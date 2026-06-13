@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
  
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v0.15.0] - 2026-06-13
+
+### Changed
+- **BREAKING:** The server `URL` is now a fixed constant (`https://hackbox.ca/`) instead of an editable `Host` field. It no longer appears in the inspector and can no longer be overridden per-host, so every host always connects to the production relay. Code that read or set `host.URL` should use the `Host.URL` constant instead.
+
 ## [v0.14.0] - 2026-06-13
 
 ### Changed
