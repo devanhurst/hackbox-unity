@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
  
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v0.14.0] - 2026-06-13
+
+### Changed
+- **BREAKING:** Migrated the host connection from socket.io to the new Cloudflare relay over raw WebSocket. The transport now connects to `wss://hackbox.ca/r/<roomCode>?userId=<hostId>` and exchanges `{ type, payload }` JSON envelopes. The application protocol (event names and payloads) is unchanged, so consumer game code is unaffected; the host endpoints move from `app.hackbox.ca` to `hackbox.ca` and room creation/lookup now uses `/api/rooms`.
+
+### Removed
+- Removed the bundled `SocketIOClient` libraries and the socket.io WebGL bridge. The standalone transport now uses the built-in `System.Net.WebSockets.ClientWebSocket`, and WebGL uses the browser `WebSocket` directly — no third-party socket dependency remains.
+
 ## [v0.13.0] - 2025-07-14
 
 ### Added
