@@ -52,8 +52,6 @@ namespace Hackbox
         #endregion
 
         #region Public Fields
-        [Tooltip("URL of server to connect to. Unless you know what you are doing, leave this as is.")]
-        public string URL = "https://hackbox.ca/";
         [Tooltip("A specific host name for this host instance.")]
         public string HostName = null;
         [Tooltip("If true, then it will reload the previous host setup.")]
@@ -100,6 +98,9 @@ namespace Hackbox
         #endregion
 
         #region Private Constants
+        // The hackbox service URL. Fixed (not an inspector field) so every host
+        // talks to the production relay; all other endpoints are derived from it.
+        public const string URL = "https://hackbox.ca/";
         private const string AppName = "Hackbox.ca";
         private const string TemporaryFileName = "LastHackboxRoom-{Name}.json";
         #endregion
