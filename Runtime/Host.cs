@@ -53,7 +53,7 @@ namespace Hackbox
 
         #region Public Fields
         [Tooltip("URL of server to connect to. Unless you know what you are doing, leave this as is.")]
-        public string URL = "https://app.hackbox.ca/";
+        public string URL = "https://hackbox.ca/";
         [Tooltip("A specific host name for this host instance.")]
         public string HostName = null;
         [Tooltip("If true, then it will reload the previous host setup.")]
@@ -105,8 +105,21 @@ namespace Hackbox
         #endregion
 
         #region Private Properties
-        private string SocketURL => URL;
-        private string RoomsURL => $"{URL}rooms/";
+        // Relay realtime endpoint: wss://hackbox.ca/r/<roomCode>?userId=<hostId>.
+        // The room code lives in the path; userId identifies the host on the
+        // handshake. The scheme is derived from URL (https -> wss, http -> ws).
+        private string SocketURL
+        {
+            get
+            {
+                string baseUrl = URL.EndsWith("/") ? URL : $"{URL}/";
+                string wsBaseUrl = baseUrl
+                    .Replace("https://", "wss://")
+                    .Replace("http://", "ws://");
+                return $"{wsBaseUrl}r/{RoomCode}?userId={Uri.EscapeDataString(UserID)}";
+            }
+        }
+        private string RoomsURL => $"{URL}api/rooms";
         private string TemporaryFilePath => Path.Combine(Application.temporaryCachePath, TemporaryFileName.Replace("{Name}", string.IsNullOrEmpty(HostName) ? name : HostName));
         #endregion
 
@@ -377,7 +390,7 @@ namespace Hackbox
         private IEnumerator CheckRoomExists()
         {
             Log($"Checking room <b>{RoomCode}</b> exists at {AppName}...");
-            using (UnityWebRequest request = UnityWebRequest.Get($"{RoomsURL}{RoomCode}"))
+            using (UnityWebRequest request = UnityWebRequest.Get($"{RoomsURL}/{RoomCode}"))
             {
                 request.SetRequestHeader("Content-Type", "application/json");
                 yield return request.SendWebRequest();
@@ -471,18 +484,12 @@ namespace Hackbox
         {
             Log($"Attempting socket connection to {AppName} for <b>{RoomCode}</b> with host <i>{UserID}</i>...");
 
-            Dictionary<string, string> queryParameters = new Dictionary<string, string>()
-            {
-                ["userId"] = UserID,
-                ["roomCode"] = RoomCode
-            };
-
-            _socketManuallyClosing = false;            
+            _socketManuallyClosing = false;
 
 #if UNITY_EDITOR || UNITY_STANDALONE
-            _socket = new StandaloneSocketIO(SocketURL, 4, queryParameters);
+            _socket = new StandaloneSocket(SocketURL);
 #elif UNITY_WEBGL
-            _socket = new WebGLSocketIO(SocketURL, 4, queryParameters);
+            _socket = new WebGLSocket(SocketURL);
 #endif
             ListenForEvents();
 
